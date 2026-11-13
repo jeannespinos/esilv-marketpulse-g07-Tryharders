@@ -25,6 +25,13 @@ def load_prices():
 def filter_prices(prices, ticker):
     return [row for row in prices if row["ticker"] == ticker]
 
+def get_first_date(prices):
+    return prices[0]["date"]
+
+
+def get_last_date(prices):
+    return prices[-1]["date"]
+
 
 def main():
     instruments = load_instruments()
@@ -55,6 +62,8 @@ def main():
     print("Observations")
     print(f"{instrument['ticker']}: {len(instrument_prices)}")
     print(f"{benchmark['ticker']}: {len(benchmark_prices)}")
+    print(f"First date   : {get_first_date(instrument_prices)}")
+    print(f"Last date    : {get_last_date(instrument_prices)}")
 
 
 if __name__ == "__main__":
