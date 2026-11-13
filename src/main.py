@@ -6,8 +6,6 @@ import json
 DATA_DIR = Path("data/sample")
 
 # These starter values mirror config/settings.yml.
-# settings.yml is a human-readable configuration contract in the CORE.
-# Parsing YAML is optional and is not required by the 18-hour lab sequence.
 LOOKBACK_LABEL = "1 month"
 INTERVAL_LABEL = "Daily"
 
@@ -25,6 +23,7 @@ def load_prices():
 def filter_prices(prices, ticker):
     return [row for row in prices if row["ticker"] == ticker]
 
+
 def get_first_date(prices):
     return prices[0]["date"]
 
@@ -39,13 +38,6 @@ def get_first_close(prices):
 
 def get_last_close(prices):
     return float(prices[-1]["close"])
-
-def get_first_date(prices):
-    return prices[0]["date"]
-
-
-def get_last_date(prices):
-    return prices[-1]["date"]
 
 
 def display_market_summary(asset, prices, show_currency=True):
@@ -82,17 +74,6 @@ def main():
     display_market_summary(instrument, instrument_prices)
     print()
     print("Benchmark")
-    print(f"{benchmark['ticker']} - {benchmark['name']}")
-    print(f"Last level: {benchmark_latest['close']}")
-    print()
-    print(f"Period: {LOOKBACK_LABEL}")
-    print(f"Interval: {INTERVAL_LABEL}")
-    print()
-    print("Observations")
-    print(f"{instrument['ticker']}: {len(instrument_prices)}")
-    print(f"{benchmark['ticker']}: {len(benchmark_prices)}")
-    print(f"First date   : {get_first_date(instrument_prices)}")
-    print(f"Last date    : {get_last_date(instrument_prices)}")
     display_market_summary(benchmark, benchmark_prices, show_currency=False)
 
 
