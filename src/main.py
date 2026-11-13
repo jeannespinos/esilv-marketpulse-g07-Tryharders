@@ -25,8 +25,10 @@ def load_prices():
 def filter_prices(prices, ticker):
     return [row for row in prices if row["ticker"] == ticker]
 
+
 def get_first_close(prices):
     return float(prices[0]["close"])
+
 
 def get_last_close(prices):
     return float(prices[-1]["close"])
@@ -38,85 +40,42 @@ def get_first_date(prices):
 def get_last_date(prices):
     return prices[-1]["date"]
 
-def count_positive_volume(prices):
-    count = 0
-
-    for row in prices:
-        if int(row["volume"]) > 0:
-            count += 1
-
-    return count
 
 def display_market_summary(asset, prices, show_currency=True):
-    first_close = get_first_close(prices)
-    last_close = get_last_close(prices)
+    currency = ""
+    if show_currency:
+        currency = " " + asset["currency"]
 
     print(f"{asset['ticker']} - {asset['name']}")
     print(f"Observations : {len(prices)}")
-
-    if show_currency:
-        print(f"First close  : {first_close:.2f} {asset['currency']}")
-        print(f"Last close   : {last_close:.2f} {asset['currency']}")
-    else:
-        print(f"First close  : {first_close:.2f}")
-        print(f"Last close   : {last_close:.2f}")
-
-def get_min_close(prices):
-    closes = []
-
-    for row in prices:
-        closes.append(float(row["close"]))
-
-    return min(closes)
-
-
-def get_max_close(prices):
-    closes = []
-
-    for row in prices:
-        closes.append(float(row["close"]))
-
-    return max(closes)
+    print(f"First date   : {get_first_date(prices)}")
+    print(f"Last date    : {get_last_date(prices)}")
+    print(f"First close  : {get_first_close(prices):.2f}{currency}")
+    print(f"Last close   : {get_last_close(prices):.2f}{currency}")
 
 
 def main():
     instruments = load_instruments()
-    prices = load_prices() 
-    instrument = instruments["instrument"]
+    prices = load_prices()
 
+    instrument = instruments["instrument"]
     benchmark = instruments["benchmark"]
 
-    instrument_prices = filter_prices(
-        prices,
-        instrument["ticker"],
-    )
-    
-    benchmark_prices = filter_prices(
-        prices,
-        benchmark["ticker"],
-    )
+    instrument_prices = filter_prices(prices, instrument["ticker"])
+    benchmark_prices = filter_prices(prices, benchmark["ticker"])
 
     print("=== MarketPulse ===")
     print()
-
     print("Market configuration")
     print(f"Period   : {LOOKBACK_LABEL}")
     print(f"Interval : {INTERVAL_LABEL}")
     print()
-
     print("Instrument")
-    display_market_summary(
-        instrument,
-        instrument_prices,
-    )
+    display_market_summary(instrument, instrument_prices)
     print()
-
     print("Benchmark")
-    display_market_summary(
-        benchmark,
-        benchmark_prices,
-        show_currency=False,
-    )
+    display_market_summary(benchmark, benchmark_prices, show_currency=False)
+
 
 if __name__ == "__main__":
     main()
