@@ -45,6 +45,13 @@ def normalize_price_row(row):
 def filter_prices(prices, ticker):
     return [row for row in prices if row["ticker"] == ticker]
 
+def get_first_date(prices):
+    return prices[0]["date"]
+
+
+def get_last_date(prices):
+    return prices[-1]["date"]
+
 
 def get_first_close(prices):
     return float(prices[0]["close"])
