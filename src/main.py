@@ -2,6 +2,13 @@ from pathlib import Path
 import csv
 import json
 
+from analytics import (
+    align_series,
+    calculate_base_100,
+    calculate_period_return,
+    calculate_relative_performance,
+)
+
 
 DATA_DIR = Path("data/sample")
 
@@ -23,6 +30,18 @@ def load_prices():
         return list(csv.DictReader(file))
 
 
+def normalize_price_row(row):
+    return {
+        "date": row["date"],
+        "ticker": row["ticker"],
+        "open": float(row["open"]),
+        "high": float(row["high"]),
+        "low": float(row["low"]),
+        "close": float(row["close"]),
+        "volume": int(row["volume"]),
+    }
+
+
 def filter_prices(prices, ticker):
     return [row for row in prices if row["ticker"] == ticker]
 
@@ -34,6 +53,7 @@ def get_first_close(prices):
 def get_last_close(prices):
     return float(prices[-1]["close"])
 
+
 def get_first_date(prices):
     return prices[0]["date"]
 
@@ -42,29 +62,45 @@ def get_last_date(prices):
     return prices[-1]["date"]
 
 
-def display_market_summary(asset, prices, show_currency=True):
+def display_market_summary(asset, prices, period_return, show_currency=True):
     currency = ""
     if show_currency:
         currency = " " + asset["currency"]
 
     print(f"{asset['ticker']} - {asset['name']}")
-    print(f"Market       : {asset['market']}")
-    print(f"Observations : {len(prices)}")
-    print(f"First date   : {get_first_date(prices)}")
-    print(f"Last date    : {get_last_date(prices)}")
-    print(f"First close  : {get_first_close(prices):.2f}{currency}")
-    print(f"Last close   : {get_last_close(prices):.2f}{currency}")
+    print(f"Market        : {asset['market']}")
+    print(f"Observations  : {len(prices)}")
+    print(f"First date    : {get_first_date(prices)}")
+    print(f"Last date     : {get_last_date(prices)}")
+    print(f"First close   : {get_first_close(prices):.2f}{currency}")
+    print(f"Last close    : {get_last_close(prices):.2f}{currency}")
+    print(f"Period return : {period_return:.2f}%")
 
 
 def main():
     instruments = load_instruments()
-    prices = load_prices()
+    prices = [normalize_price_row(row) for row in load_prices()]
 
     instrument = instruments["instrument"]
     benchmark = instruments["benchmark"]
 
     instrument_prices = filter_prices(prices, instrument["ticker"])
     benchmark_prices = filter_prices(prices, benchmark["ticker"])
+
+    aligned_instrument, aligned_benchmark = align_series(
+        instrument_prices,
+        benchmark_prices,
+    )
+
+    instrument_return = calculate_period_return(aligned_instrument)
+    benchmark_return = calculate_period_return(aligned_benchmark)
+    relative = calculate_relative_performance(
+        instrument_return,
+        benchmark_return,
+    )
+
+    instrument_base = calculate_base_100(aligned_instrument)
+    benchmark_base = calculate_base_100(aligned_benchmark)
 
     print("=== MarketPulse ===")
     print()
@@ -74,10 +110,33 @@ def main():
     print(f"Provider : {PROVIDER_LABEL}")
     print()
     print("Instrument")
-    display_market_summary(instrument, instrument_prices)
+    display_market_summary(instrument, aligned_instrument, instrument_return)
     print()
     print("Benchmark")
-    display_market_summary(benchmark, benchmark_prices, show_currency=False)
+    display_market_summary(
+        benchmark,
+        aligned_benchmark,
+        benchmark_return,
+        show_currency=False,
+    )
+    print()
+    print("Relative performance")
+    print(
+        f"{instrument['ticker']} vs {benchmark['ticker']} : "
+        f"{relative:+.2f} percentage points"
+    )
+    print()
+    print("Base 100")
+    print(
+        f"{instrument['ticker']:<6}: "
+        f"{instrument_base[0]['value']:.2f} -> "
+        f"{instrument_base[-1]['value']:.2f}"
+    )
+    print(
+        f"{benchmark['ticker']:<6}: "
+        f"{benchmark_base[0]['value']:.2f} -> "
+        f"{benchmark_base[-1]['value']:.2f}"
+    )
 
 
 if __name__ == "__main__":
