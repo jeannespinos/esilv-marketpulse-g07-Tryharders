@@ -34,6 +34,13 @@ def get_first_close(prices):
 def get_last_close(prices):
     return float(prices[-1]["close"])
 
+def get_first_date(prices):
+    return prices[0]["date"]
+
+
+def get_last_date(prices):
+    return prices[-1]["date"]
+
 
 def display_market_summary(asset, prices, period_return, show_currency=True):
     currency = ""
