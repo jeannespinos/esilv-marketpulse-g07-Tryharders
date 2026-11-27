@@ -1,124 +1,46 @@
-\# Bloomberg Field Mapping
+# Bloomberg Field Mapping
 
+## Access mode
 
+APPROVED_SAMPLE
 
-\## Access mode
+Source:
+data/sample/bloomberg_reference_sample.json
 
+Reference:
+docs/10_BLOOMBERG_INSTRUCTOR_REFERENCE.md
 
+Live connectivity:
+not demonstrated
 
-APPROVED\_SAMPLE
-
-
-
-\- Source: `data/sample/bloomberg\_reference\_sample.json`
-
-\- Expected canonical reference: `data/sample/bloomberg\_reference\_expected.json`
-
-\- Instructor reference: `docs/10\_BLOOMBERG\_INSTRUCTOR\_REFERENCE.md` (not present in the team repository; the mapping below was derived by comparing the sample fixture with the expected canonical result)
-
-\- Live connectivity: \*\*not demonstrated\*\*
-
-
-
-The fixture declares itself as `"sample\_kind": "instructor\_approved\_fallback\_fixture"` and `"is\_live\_bloomberg\_output": false`. Its values are illustrative teaching values reused from `data/sample/prices.csv`, not certified Bloomberg historical observations.
-
-
-
-\## Market instruments
-
-
+## Market instruments
 
 | Role | Canonical ticker | Bloomberg identifier |
-
 |---|---|---|
-
 | Instrument | AAPL | AAPL US Equity |
-
 | Benchmark | SP500 | SPX Index |
 
-
-
-Both pairs were checked in the sample fixture (`canonical\_ticker` / `provider\_identifier` keys of each series).
-
-
-
-\## Field mapping
-
-
+## Field mapping
 
 | MarketPulse field | Source field or mapping | Status / notes |
-
 |---|---|---|
+| date | `observation_date` | Teaching wrapper key (`string`, `YYYY-MM-DD`); not a Bloomberg LIVE field mnemonic |
+| ticker | application mapping | Canonical ticker (`AAPL` or `SP500`), distinct from provider identifier (`AAPL US Equity`, `SPX Index`) |
+| open | `open_value` | Teaching wrapper key (`float`); not a Bloomberg LIVE field mnemonic |
+| high | `high_value` | Teaching wrapper key (`float`); not a Bloomberg LIVE field mnemonic |
+| low | `low_value` | Teaching wrapper key (`float`); not a Bloomberg LIVE field mnemonic |
+| close | `close_value` | Teaching wrapper key (`float`); not a Bloomberg LIVE field mnemonic |
+| volume | `volume_value` | Teaching wrapper key (`int`); not a Bloomberg LIVE field mnemonic (`0` on `SP500` in sample) |
 
-| date | `observation\_date` | teaching wrapper key; string `YYYY-MM-DD`, kept as is |
+Note: teaching wrapper key != Bloomberg LIVE field mnemonic. Illustrative teaching values reused from starter data; not certified Bloomberg historical observations or proof of live Bloomberg connectivity.
 
-| ticker | application mapping from series `canonical\_ticker` | `AAPL` or `SP500`; never the Bloomberg identifier |
+## TD10 handoff
 
-| open | `open\_value` | teaching wrapper key; numeric |
-
-| high | `high\_value` | teaching wrapper key; numeric |
-
-| low | `low\_value` | teaching wrapper key; numeric |
-
-| close | `close\_value` | teaching wrapper key; numeric |
-
-| volume | `volume\_value` | teaching wrapper key; integer, `0` for SPX Index |
-
-
-
-\*\*Important:\*\* `observation\_date`, `open\_value`, `high\_value`, `low\_value`, `close\_value` and `volume\_value` are \*\*teaching wrapper keys\*\*, not Bloomberg LIVE field mnemonics. No LIVE Bloomberg field name is documented here because none was observed.
-
-
-
-\## Inspected inputs
-
-
-
-| Series | Observations | First date | Last date | Missing values |
-
-|---|---|---|---|---|
-
-| AAPL US Equity → AAPL | 21 | 2026-09-01 | 2026-09-30 | none |
-
-| SPX Index → SP500 | 21 | 2026-09-01 | 2026-09-30 | none (volume is 0) |
-
-
-
-\## TD10 handoff
-
-
-
-\- Access mode: APPROVED\_SAMPLE
-
-\- Instrument identifier: `AAPL US Equity` → canonical `AAPL`
-
-\- Benchmark identifier: `SPX Index` → canonical `SP500`
-
-\- Date representation: string `YYYY-MM-DD` in `observation\_date`
-
-\- Input structure: JSON object with a `series` list; each series has `role`, `canonical\_ticker`, `provider\_identifier` and an `observations` list
-
-\- Missing fields: none in the sample
-
-\- Special normalization notes:
-
-&#x20; - set `ticker` from `canonical\_ticker`, not from `provider\_identifier`;
-
-&#x20; - convert prices to `float` and volume to `int` (the JSON contains integers such as `248` or `6600` that must become floats);
-
-&#x20; - SPX Index volume is `0`: an index has no traded volume, so this is expected, not an error;
-
-&#x20; - the output must match `data/sample/bloomberg\_reference\_expected.json` row for row;
-
-&#x20; - `analytics.py` must not change.
-
-\- Expected canonical reference: `data/sample/bloomberg\_reference\_expected.json`
-
-
-
-\## Security
-
-
-
-No credential, session token or terminal information is included in this document.
-
+- Access mode: APPROVED_SAMPLE (Live connectivity: not demonstrated)
+- Instrument identifier: `AAPL US Equity` (canonical: `AAPL`)
+- Benchmark identifier: `SPX Index` (canonical: `SP500`)
+- Date representation: ISO date string (`YYYY-MM-DD`, 21 aligned daily observations from `2026-09-01` to `2026-09-30` per series)
+- Input structure: JSON object with metadata and a `series` list (`role`, `canonical_ticker`, `provider_identifier`, `observations` array)
+- Missing fields: None in `bloomberg_reference_sample.json` (`observation_date`, `open_value`, `high_value`, `low_value`, `close_value`, `volume_value` all present; `volume_value` is `0` for `SP500`)
+- Special normalization notes: Normalize `series[*].observations[*]` into canonical rows (`date`, `ticker`, `open`, `high`, `low`, `close`, `volume`) preserving `AAPL` and `SP500`, keeping `src/analytics.py` provider-neutral, and never labelling fallback output as live Bloomberg retrieval.
+- Expected canonical reference: `data/sample/bloomberg_reference_expected.json`
