@@ -1,0 +1,194 @@
+Windows PowerShell 5.1
+Copyright (C) Microsoft Corporation. Tous droits réservés.
+
+PS C:\Users\guyma> cd  C:\Users\guyma\labs\esilv-marketpulse-g07-Tryharders
+PS C:\Users\guyma\labs\esilv-marketpulse-g07-Tryharders> git status
+On branch feature/bloomberg-provider
+Your branch is up to date with 'origin/feature/bloomberg-provider'.
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+        Claude outputs/
+
+nothing added to commit but untracked files present (use "git add" to track)
+PS C:\Users\guyma\labs\esilv-marketpulse-g07-Tryharders> Remove-Item -Recurse "Claude outputs"
+PS C:\Users\guyma\labs\esilv-marketpulse-g07-Tryharders> git status
+On branch feature/bloomberg-provider
+Your branch is up to date with 'origin/feature/bloomberg-provider'.
+
+nothing to commit, working tree clean
+PS C:\Users\guyma\labs\esilv-marketpulse-g07-Tryharders> git switch jeanne
+Switched to branch 'jeanne'
+Your branch is up to date with 'origin/jeanne'.
+PS C:\Users\guyma\labs\esilv-marketpulse-g07-Tryharders> git pull
+remote: Enumerating objects: 21, done.
+remote: Counting objects: 100% (11/11), done.
+remote: Compressing objects: 100% (5/5), done.
+remote: Total 21 (delta 8), reused 6 (delta 6), pack-reused 10 (from 1)
+Unpacking objects: 100% (21/21), 10.73 KiB | 85.00 KiB/s, done.
+From https://github.com/jeannespinos/esilv-marketpulse-g07-Tryharders
+ + 50ebdea...ee98665 branchemaelys         -> origin/branchemaelys  (forced update)
+ * [new branch]      docs/add-td9-terminal -> origin/docs/add-td9-terminal
+   abd5e87..9a63ecb  esther                -> origin/esther
+   5d15b13..ee21b6d  main                  -> origin/main
+Already up to date.
+PS C:\Users\guyma\labs\esilv-marketpulse-g07-Tryharders> python src/main.py
+=== MarketPulse ===
+
+Market configuration
+Period   : 1 month
+Interval : Daily
+Provider : Sample CSV (data/sample)
+
+Instrument
+AAPL - Apple Inc.
+Market       : NASDAQ
+Observations : 21
+First date   : 2026-09-01
+Last date    : 2026-09-30
+First close  : 250.00 USD
+Last close   : 266.20 USD
+Period return : 6.48%
+
+Benchmark
+SP500 - S&P 500
+Market       : US
+Observations : 21
+First date   : 2026-09-01
+Last date    : 2026-09-30
+First close  : 6600.00
+Last close   : 6742.00
+Period return : 2.15%
+
+Relative performance
+AAPL vs SP500 : +4.33 percentage points
+
+Base 100
+AAPL  : 100.00 -> 106.48
+SP500 : 100.00 -> 102.15
+PS C:\Users\guyma\labs\esilv-marketpulse-g07-Tryharders> python -m pip show yfinance
+Name: yfinance
+Version: 1.8.0
+Summary: Download market data from Yahoo! Finance API
+Home-page: https://github.com/ranaroussi/yfinance
+Author:
+Author-email: Ran Aroussi <ran@aroussi.com>
+License: Apache-2.0
+Location: C:\Users\guyma\AppData\Local\Programs\Python\Python312\Lib\site-packages
+Requires: beautifulsoup4, curl_cffi, lxml, numpy, pandas, peewee, platformdirs, protobuf, pytz, requests, websockets
+Required-by:
+PS C:\Users\guyma\labs\esilv-marketpulse-g07-Tryharders> notepad requirements.txt
+PS C:\Users\guyma\labs\esilv-marketpulse-g07-Tryharders> python -c "import yfinance as yf; history = yf.Ticker('AAPL').history(period='1mo', interval='1d', auto_adjust=False); print(history.head()); print(history.columns)"
+                                 Open  ...  Stock Splits
+Date                                   ...
+2026-10-27 00:00:00-04:00  343.170013  ...           0.0
+2026-10-28 00:00:00-04:00  346.920013  ...           0.0
+2026-10-29 00:00:00-04:00  348.000000  ...           0.0
+2026-10-30 00:00:00-04:00  346.720001  ...           0.0
+2026-11-02 00:00:00-05:00  342.670013  ...           0.0
+
+[5 rows x 8 columns]
+Index(['Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume', 'Dividends',
+       'Stock Splits'],
+      dtype='str')
+PS C:\Users\guyma\labs\esilv-marketpulse-g07-Tryharders>
+PS C:\Users\guyma\labs\esilv-marketpulse-g07-Tryharders> New-Item src\providers\__init__.py
+
+
+    Répertoire:
+    C:\Users\guyma\labs\esilv-marketpulse-g07-Tryharders\src\providers
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        27/11/2026     15:46              0 __init__.py
+
+
+PS C:\Users\guyma\labs\esilv-marketpulse-g07-Tryharders> notepad src\providers\yahoo_provider.py
+PS C:\Users\guyma\labs\esilv-marketpulse-g07-Tryharders> python -c "import sys; sys.path.insert(0, 'src'); from providers.yahoo_provider import fetch_yahoo_prices; rows = fetch_yahoo_prices('AAPL', '1mo', '1d'); print(rows[0]); print(len(rows))"
+{'date': '2026-10-27', 'ticker': 'AAPL', 'open': 343.1700134277344, 'high': 347.7799987792969, 'low': 342.3900146484375, 'close': 347.1000061035156, 'volume': 39984400}
+23
+PS C:\Users\guyma\labs\esilv-marketpulse-g07-Tryharders>
+PS C:\Users\guyma\labs\esilv-marketpulse-g07-Tryharders> python -c "import sys; sys.path.insert(0, 'src'); from providers.yahoo_provider import fetch_yahoo_prices; rows = fetch_yahoo_prices('SP500', '1mo', '1d'); print(rows[0]['ticker']); print(len(rows))"
+SP500
+23
+PS C:\Users\guyma\labs\esilv-marketpulse-g07-Tryharders> notepad src\main.py
+
+PS C:\Users\guyma\labs\esilv-marketpulse-g07-Tryharders> python src/main.py
+=== MarketPulse ===
+
+Market configuration
+Period   : 1 month
+Interval : Daily
+Provider : Yahoo Finance via yfinance
+
+Instrument
+AAPL - Apple Inc.
+Market       : NASDAQ
+Observations : 23
+First date   : 2026-10-27
+Last date    : 2026-11-27
+First close  : 347.10 USD
+Last close   : 357.40 USD
+Period return : 2.97%
+
+Benchmark
+SP500 - S&P 500
+Market       : US
+Observations : 23
+First date   : 2026-10-27
+Last date    : 2026-11-27
+First close  : 7722.60
+Last close   : 7233.68
+Period return : -6.33%
+
+Relative performance
+AAPL vs SP500 : +9.30 percentage points
+
+Base 100
+AAPL  : 100.00 -> 102.97
+SP500 : 100.00 -> 93.67
+PS C:\Users\guyma\labs\esilv-marketpulse-g07-Tryharders> Select-String -Path src\analytics.py -Pattern "GSPC","yfinance","Yahoo" -CaseSensitive
+PS C:\Users\guyma\labs\esilv-marketpulse-g07-Tryharders> git status
+On branch jeanne
+Your branch is up to date with 'origin/jeanne'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+        modified:   requirements.txt
+        modified:   src/main.py
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+        src/providers/
+
+no changes added to commit (use "git add" and/or "git commit -a")
+PS C:\Users\guyma\labs\esilv-marketpulse-g07-Tryharders> git add requirements.txt src/main.py src/providers/__init__.py src/providers/yahoo_provider.py
+PS C:\Users\guyma\labs\esilv-marketpulse-g07-Tryharders> git status
+On branch jeanne
+Your branch is up to date with 'origin/jeanne'.
+
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+        modified:   requirements.txt
+        modified:   src/main.py
+        new file:   src/providers/__init__.py
+        new file:   src/providers/yahoo_provider.py
+
+PS C:\Users\guyma\labs\esilv-marketpulse-g07-Tryharders> git commit -m "feat: add Yahoo Finance provider (TD08)"
+[jeanne 162fb31] feat: add Yahoo Finance provider (TD08)
+ 4 files changed, 36 insertions(+), 10 deletions(-)
+ create mode 100644 src/providers/__init__.py
+ create mode 100644 src/providers/yahoo_provider.py
+PS C:\Users\guyma\labs\esilv-marketpulse-g07-Tryharders> git push
+Enumerating objects: 12, done.
+Counting objects: 100% (12/12), done.
+Delta compression using up to 16 threads
+Compressing objects: 100% (7/7), done.
+Writing objects: 100% (8/8), 1.13 KiB | 193.00 KiB/s, done.
+Total 8 (delta 3), reused 1 (delta 0), pack-reused 0 (from 0)
+remote: Resolving deltas: 100% (3/3), completed with 3 local objects.
+To https://github.com/jeannespinos/esilv-marketpulse-g07-Tryharders.git
+   a92a3c6..162fb31  jeanne -> jeanne
+PS C:\Users\guyma\labs\esilv-marketpulse-g07-Tryharders>
