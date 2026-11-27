@@ -7,6 +7,8 @@ from analytics import (
     calculate_period_return,
     calculate_relative_performance,
 )
+from providers.yahoo_provider import fetch_yahoo_prices
+
 
 DATA_DIR = Path("data/sample")
 
@@ -15,7 +17,7 @@ DATA_DIR = Path("data/sample")
 # Parsing YAML is optional and is not required by the 18-hour lab sequence.
 LOOKBACK_LABEL = "1 month"
 INTERVAL_LABEL = "Daily"
-PROVIDER_LABEL = "Sample CSV (data/sample)"
+PROVIDER_LABEL = "Yahoo Finance via yfinance"
 
 
 def load_instruments():
@@ -72,18 +74,11 @@ def display_market_summary(asset, prices, show_currency=True):
 
 def main():
     instruments = load_instruments()
-    prices = load_prices()
-    
-    normalized_prices = [
-        normalize_price_row(row)
-        for row in prices
-    ]
-
     instrument = instruments["instrument"]
     benchmark = instruments["benchmark"]
 
-    instrument_prices = filter_prices(normalized_prices, instrument["ticker"])
-    benchmark_prices = filter_prices(normalized_prices, benchmark["ticker"])
+    instrument_prices = fetch_yahoo_prices(instrument["ticker"], "1mo", "1d")
+    benchmark_prices = fetch_yahoo_prices(benchmark["ticker"], "1mo", "1d")
 
     aligned_instrument, aligned_benchmark = align_series(
         instrument_prices,
